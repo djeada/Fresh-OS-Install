@@ -109,18 +109,7 @@ sudo apt remove --purge rhythmbox
 
 Managing your passwords securely is crucial. Here’s how to set it up:
 
-1. **Choose a Password Manager:**
-   - [KeePassXC](https://keepassxc.org/) is recommended for its offline capabilities and strong security features.
-   
-2. **Set Up KeePassXC:**
-   - **Install KeePassXC:**
-     ```bash
-     sudo apt install keepassxc
-     ```
-   - **Create a New Database:**
-     - Open KeePassXC and create a new database to store all your passwords and backup codes.
-   - **Backup:**
-     - Save a backup of your KeePassXC database on your USB drive or another secure location.
+todo
 
 ## Account Setup
 
@@ -128,6 +117,8 @@ Configure your essential online accounts to ensure seamless access and synchroni
 
 1. **Social Media and Services:**
    - **Accounts to Set Up:**
+   - ebay
+   - amazon
      - GitHub
      - YouTube
      - Gmail
@@ -139,7 +130,7 @@ Configure your essential online accounts to ensure seamless access and synchroni
 
 2. **Security Measures:**
    - Enable two-factor authentication (2FA) where possible.
-   - Store backup codes securely in your password manager.
+   - Store backup codes securely on your desk after printing them out.
 
 ## Software Installation
 
@@ -191,6 +182,8 @@ Ensure you have the latest compilers, development tools, and essential software 
      ```
 
 ### Development Tools
+
+tex maker for latex
 
 1. **Visual Studio Code:**
    - **Download DEB Package:**
