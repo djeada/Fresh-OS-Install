@@ -308,7 +308,7 @@ kdenlive
 simple screen recorde
 audacity
 
-## Additional Resources
+## organization tips
 
 - **Central CSV for Software Management:**
   - Maintain a CSV file with columns like:
@@ -316,6 +316,9 @@ audacity
     - **Installation Path**
     - **Shortcut Commands**
     - **Uninstallation Commands**
+
+- use single package manager
+- keep track of everything you install
 
 - **Backup and Recovery:**
   - Regularly back up your important files and configurations.
