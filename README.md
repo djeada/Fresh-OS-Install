@@ -181,6 +181,10 @@ Ensure you have the latest compilers, development tools, and essential software 
      sudo pip3 install virtualenv
      ```
 
+     NEVER INSTALL ANYTHING GLOBALLY WITH EXCEPTION OF LINTERS SUCH AS BLACK
+     STORE EVEYRTHING PER PROJECT USING VIRTUALENV
+     YOU DONE WITH YOUR PROJECT CAN DELETE THE FOLDER AND BE DONE
+
 ### Development Tools
 
 tex maker for latex
