@@ -59,9 +59,23 @@ Congratulations on installing your new operating system! Follow this minimalist 
      sudo ufw reload
      ```
 
+install wireshark
+
 ## Remove Bloatware
 
-Even Linux Mint may come with some pre-installed applications you might not need. Removing unnecessary software helps maintain a lean system.
+Even Linux Mint may come with some pre-installed applications you might not need. 
+
+sudo apt purge -y fonts-kacst fonts-kacst-one fonts-khmeros-core fonts-lklug-sinhala fonts-guru fonts-nanum fonts-noto-cjk fonts-takao-pgothic fonts-tibetan-machine fonts-guru-extra fonts-lao fonts-sil-padauk fonts-sil-abyssinica fonts-tlwg-* fonts-lohit-* fonts-beng fonts-beng-extra fonts-gargi fonts-gubbi fonts-gujr fonts-gujr-extra fonts-kalapi fonts-lohit-gujr fonts-samyak-* fonts-noto-unhinted fonts-noto-hinted fonts-navilu fonts-nakula fonts-orya-extra fonts-pagul fonts-sahadeva fonts-sarai fonts-smc fonts-telu-extra fonts-wqy-microhei
+
+sudo apt-get remove --purge banshee
+sudo apt-get remove --purge thunderbird thunderbird-gnome-support thunderbird-locale-en thunderbird-locale-en-us
+sudo apt-get remove --purge pix pix-data
+
+LibreOffice
+thunderbird
+
+Removing unnecessary software helps maintain a lean system.
+
 
 1. **List Installed Packages:**
    ```bash
@@ -277,6 +291,22 @@ Customize your desktop environment with dynamic window managers like dwm.
      ```bash
      sudo make clean install
      ```
+
+## Games
+
+steam
+
+## office tools
+
+gimp
+
+## Video Editing
+
+Peek
+Obs studio
+kdenlive
+simple screen recorde
+audacity
 
 ## Additional Resources
 
