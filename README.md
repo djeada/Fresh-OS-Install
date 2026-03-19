@@ -2,11 +2,40 @@
 
 Congratulations on installing your new operating system! Follow this comprehensive guide to seamlessly restore all your necessary files, configurations, and applications without unnecessary bloat. This guide is tailored for Linux Mint but can be adapted to other lightweight distributions as needed.
 
+A fresh operating system installation provides a clean slate—free of accumulated configuration drift, orphaned packages, and potential security vulnerabilities that build up over time. In systems administration, this practice is sometimes referred to as **cattle vs. pets**: treating machines as reproducible, disposable units rather than irreplaceable hand-crafted environments. This guide embodies that philosophy by providing a deterministic, repeatable process for bringing a bare installation to a fully productive state.
+
+## Table of Contents
+
+- [Restore Files from USB](#restore-files-from-usb)
+- [Restore System Configurations](#restore-system-configurations)
+- [System Updates and Kernel Management](#system-updates-and-kernel-management)
+- [Network Configuration](#network-configuration)
+- [Security Hardening](#security-hardening)
+- [Remove Bloatware](#remove-bloatware)
+- [Browser Setup](#browser-setup)
+- [Password Management](#password-management)
+- [Account Setup](#account-setup)
+- [Software Installation](#software-installation)
+- [Programming Languages](#programming-languages)
+- [Development Tools](#development-tools)
+- [Documentation and Reference Tools](#documentation-and-reference-tools)
+- [Containerization](#containerization)
+- [Virtualization](#virtualization)
+- [Window Managers](#window-managers)
+- [Games](#games)
+- [Office Tools](#office-tools)
+- [Video Editing](#video-editing)
+- [Disk Management and Filesystem Maintenance](#disk-management-and-filesystem-maintenance)
+- [System Monitoring and Performance Tuning](#system-monitoring-and-performance-tuning)
+- [Organization Tips](#organization-tips)
+
 ## Restore Files from USB
+
+In Unix-like operating systems, the filesystem follows the **Filesystem Hierarchy Standard (FHS)**, which defines a predictable directory structure rooted at `/`. User data resides under `/home/<username>/`, while system configuration lives under `/etc/`. Understanding this hierarchy is essential for restoring files to their correct locations. The USB restoration process leverages the `cp` (copy) command, which operates at the **VFS (Virtual Filesystem)** layer, abstracting away differences between the USB's filesystem (typically FAT32 or exFAT) and the target's filesystem (typically ext4).
 
 I. **Connect USB Drive:**  
 
-Make sure your USB drive is properly formatted and contains all your backup files. Insert the USB drive into an available USB port on your computer and wait for the system to recognize and mount the USB drive automatically.
+Make sure your USB drive is properly formatted and contains all your backup files. Insert the USB drive into an available USB port on your computer and wait for the system to recognize and mount the USB drive automatically. Modern Linux distributions use **udisks2** to automatically detect and mount removable storage devices. The kernel communicates hardware events through **udev**, which triggers the automount process.
 
 II. **Identify Mount Point:**  
 
@@ -85,7 +114,7 @@ cp -r /media/usb/.local ~/.local
 Make sure that the ownership of the copied files matches your current user by running:
 
 ```bash
-chown -R $(whoami)$(whoami) ~/.config ~/.local
+chown -R $(whoami):$(whoami) ~/.config ~/.local
 ```
 
 III. **Restore Shell Configurations:**  
@@ -116,10 +145,63 @@ cp -r /media/usb/.config/gtk-3.0 ~/.config/gtk-3.0
 Adjust permissions if necessary with:
 
 ```bash
-chown -R $(whoami)$(whoami) ~/.mozilla ~/.config/gtk-3.0
+chown -R $(whoami):$(whoami) ~/.mozilla ~/.config/gtk-3.0
 ```
 
+## System Updates and Kernel Management
+
+After restoring personal files, the first operational priority is to bring the system's software to its latest state. Package management in Debian-based distributions relies on **APT (Advanced Package Tool)**, which resolves dependency graphs using a SAT-solver approach to ensure that all library requirements are satisfied without conflicts. The underlying **dpkg** system manages individual `.deb` packages, while APT orchestrates downloads from configured repositories.
+
+The Linux kernel is the core of the operating system, managing hardware abstraction, process scheduling (using the **Completely Fair Scheduler**), memory management (virtual memory via page tables and the MMU), and system calls. Keeping the kernel updated is essential for hardware compatibility, performance improvements, and security patches.
+
+I. **Update Package Lists and Upgrade Installed Packages:**
+
+The `apt update` command refreshes the local package index from configured repositories in `/etc/apt/sources.list` and `/etc/apt/sources.list.d/`. The `apt upgrade` command then resolves dependencies and installs newer versions of all currently installed packages.
+
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+II. **Perform a Distribution Upgrade:**
+
+A distribution upgrade handles packages that require installing or removing other packages to complete the upgrade (e.g., kernel meta-packages). This is essential after a fresh install to receive all pending updates.
+
+```bash
+sudo apt dist-upgrade -y
+```
+
+III. **Check the Current Kernel Version:**
+
+The kernel version string follows the format `major.minor.patch`. **LTS (Long Term Support)** kernels receive extended maintenance, making them preferable for production systems.
+
+```bash
+uname -r
+```
+
+IV. **Remove Old Kernels:**
+
+Over time, kernel updates leave old versions installed. Removing them reclaims disk space in `/boot`, which is often a small partition.
+
+```bash
+sudo apt autoremove --purge
+```
+
+V. **Enable Unattended Security Upgrades:**
+
+Automating security updates reduces the window of exposure to known vulnerabilities. The `unattended-upgrades` package applies critical patches automatically.
+
+```bash
+sudo apt install unattended-upgrades
+sudo dpkg-reconfigure -plow unattended-upgrades
+```
+
+This configures the system to automatically download and install security updates, following the principle of **defense in depth**.
+
 ## Network Configuration
+
+Networking on Linux is governed by the **TCP/IP protocol stack**, a layered architecture comprising the link layer (Ethernet/Wi-Fi), the internet layer (IP addressing and routing), the transport layer (TCP for reliable streams, UDP for datagrams), and the application layer (HTTP, SSH, DNS). **NetworkManager** is the standard daemon for managing network connections on desktop Linux systems, abstracting complex operations like DHCP lease negotiation, DNS resolver configuration, and 802.1X authentication into a unified interface.
+
+Firewall configuration implements the security principle of **default deny**—blocking all traffic except explicitly permitted flows. On Linux, firewalls operate through **netfilter**, a kernel-space framework that inspects packets at various hook points. **UFW (Uncomplicated Firewall)** provides a user-friendly interface to **iptables/nftables**, which are the userspace tools for configuring netfilter rules.
 
 I. **Verify Network Connectivity:**  
 
@@ -184,8 +266,76 @@ Enhance your network management capabilities by installing additional tools:
 sudo apt install wireshark net-tools
 ```
 
-- ** A powerful network protocol analyzer.
-- ** Includes necessary networking utilities like `ifconfig` and `netstat`.
+- **Wireshark:** A powerful network protocol analyzer that captures and inspects packets at every layer of the TCP/IP stack. Useful for diagnosing connectivity issues, analyzing protocol behavior, and auditing network security.
+- **net-tools:** Includes legacy networking utilities like `ifconfig` and `netstat`. While the modern `iproute2` suite (`ip`, `ss`) is preferred, `net-tools` remains useful for compatibility with older scripts and documentation.
+
+IX. **Configure DNS Resolution:**
+
+DNS (Domain Name System) translates human-readable hostnames into IP addresses. For improved privacy and performance, consider using encrypted DNS resolvers:
+
+```bash
+sudo apt install systemd-resolved
+sudo systemctl enable --now systemd-resolved
+```
+
+Edit `/etc/systemd/resolved.conf` to specify preferred DNS servers (e.g., `1.1.1.1` for Cloudflare or `9.9.9.9` for Quad9), which support **DNS-over-TLS (DoT)** for encrypted queries.
+
+## Security Hardening
+
+Security hardening is the process of reducing the **attack surface** of a system by disabling unnecessary services, enforcing access controls, and applying the **principle of least privilege**. The Center for Internet Security (CIS) publishes comprehensive benchmarks for Linux distributions that serve as an industry-standard reference for secure configurations.
+
+I. **Configure SSH Securely:**
+
+SSH (Secure Shell) uses **asymmetric cryptography** (public/private key pairs) for authentication. Key-based authentication is significantly more secure than passwords because it is immune to brute-force and credential-stuffing attacks.
+
+```bash
+sudo apt install openssh-server
+ssh-keygen -t ed25519 -C "your.email@example.com"
+```
+
+The **Ed25519** algorithm is preferred over RSA for its smaller key size, faster operations, and resistance to several classes of side-channel attacks. Harden the SSH daemon configuration:
+
+```bash
+sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+```
+
+II. **Install and Configure fail2ban:**
+
+**fail2ban** monitors log files for repeated authentication failures and dynamically updates firewall rules to ban offending IP addresses. This is an implementation of **adaptive security**—the system's defenses respond automatically to observed threats.
+
+```bash
+sudo apt install fail2ban
+sudo systemctl enable --now fail2ban
+```
+
+Create a local configuration to avoid overwriting defaults during upgrades:
+
+```bash
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+```
+
+III. **Review AppArmor Profiles:**
+
+**AppArmor** is a **Mandatory Access Control (MAC)** framework that confines programs to a limited set of resources. Unlike traditional **Discretionary Access Control (DAC)** based on Unix file permissions, MAC policies are enforced by the kernel regardless of the user's identity.
+
+```bash
+sudo aa-status
+```
+
+This command lists all loaded AppArmor profiles and their enforcement status. Profiles in **enforce** mode actively block unauthorized access; profiles in **complain** mode log violations without blocking.
+
+IV. **Audit Listening Services:**
+
+Every network-facing service is a potential entry point. Regularly audit which processes are listening for connections and disable any that are unnecessary:
+
+```bash
+sudo ss -tulnp
+```
+
+The flags break down as: `-t` (TCP), `-u` (UDP), `-l` (listening), `-n` (numeric, no DNS resolution), `-p` (show process name).
 
 ## Remove Bloatware
 
@@ -218,7 +368,7 @@ sudo apt autoremove
 sudo apt clean
 ```
 
-V. **Example: To Remove the Pre-Installed Music Player:**  
+IV. **Example: To Remove the Pre-Installed Music Player:**  
 
 ```bash
 sudo apt remove --purge rhythmbox
@@ -607,19 +757,20 @@ II. **Markdown Editors:**
 
 Tools for writing and previewing Markdown documents.
 
-- typoradeb
+- **Typora:**
 
 ```bash
-wget -O ~/Downloads/typoradeb https://typora.io/linux/public-key.asc
-sudo dpkg -i ~/Downloads/typoradeb
-sudo apt -f install
+wget -qO - https://typora.io/linux/public-key.asc | sudo tee /etc/apt/trusted.gpg.d/typora.asc
+sudo add-apt-repository 'deb https://typora.io/linux ./'
+sudo apt update
+sudo apt install typora
 ```
 
-- marktextdeb
+- **Mark Text:**
 
 ```bash
-wget -O ~/Downloads/marktextdeb https://github.com/marktext/marktext/releases/download/v0.16.3/marktext-amd64deb
-sudo dpkg -i ~/Downloads/marktextdeb
+wget -O ~/Downloads/marktext.deb https://github.com/marktext/marktext/releases/download/v0.16.3/marktext-amd64.deb
+sudo dpkg -i ~/Downloads/marktext.deb
 sudo apt -f install
 ```
 
@@ -634,11 +785,11 @@ Docker provides a consistent environment for applications, making it easier to d
 ```bash
 sudo apt update
 sudo apt install apt-transport-https ca-certificates curl gnupg lsb-release
-curl -fsSL https://downloaddocker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.listd/docker.list > /dev/null
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt update
 sudo apt install docker-ce docker-ce-cli containerd.io
-sudo usermod -aG docker$USER
+sudo usermod -aG docker $USER
 ```
 
 After adding your user to the `docker` group, log out and back in to apply the changes.
@@ -679,7 +830,7 @@ I. **Install dwm Dependencies:**
 Before installing `dwm`, make sure that all necessary dependencies are present on your system. These libraries provide the necessary functionality required by `dwm`.
 
 ```bash
-sudo apt install build-necessary libx11-dev libxft-dev libxinerama-dev
+sudo apt install build-essential libx11-dev libxft-dev libxinerama-dev
 ```
 
 - Provides the compiler and related tools.
