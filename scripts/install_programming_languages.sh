@@ -173,7 +173,7 @@ menu_action() {
 }
 
 menu_language() {
-    local langs_=()
+    local selected_langs=()
     echo "Select programming languages:"
     options=("Go" "Haskell" "Rust" "Node.js" "C/C++" "Python" "All")
     for i in "${!options[@]}"; do
@@ -181,23 +181,23 @@ menu_language() {
     done
     read -rp "Enter numbers separated by spaces: " selections_input
     if [[ -z "$selections_input" ]]; then
-        langs_=(go haskell rust node gcc python)
+        selected_langs=(go haskell rust node gcc python)
     else
         read -ra selections <<< "$selections_input"
         for selection in "${selections[@]}"; do
             case $selection in
-                1) langs_+=("go") ;;
-                2) langs_+=("haskell") ;;
-                3) langs_+=("rust") ;;
-                4) langs_+=("node") ;;
-                5) langs_+=("gcc") ;;
-                6) langs_+=("python") ;;
-                7) langs_=(go haskell rust node gcc python) ;;
+                1) selected_langs+=("go") ;;
+                2) selected_langs+=("haskell") ;;
+                3) selected_langs+=("rust") ;;
+                4) selected_langs+=("node") ;;
+                5) selected_langs+=("gcc") ;;
+                6) selected_langs+=("python") ;;
+                7) selected_langs=(go haskell rust node gcc python); break ;;
                 *) echo "Invalid selection: $selection" ;;
             esac
         done
     fi
-    langs=("${langs_[@]}")
+    langs=("${selected_langs[@]}")
 }
 
 update_and_install

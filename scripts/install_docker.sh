@@ -265,12 +265,12 @@ purge_docker() {
         echo -e "${YELLOW}Purging Docker and related packages...${NC}"
         log "Purging Docker and related packages."
         apt-get purge -y docker-ce docker-ce-cli containerd.io >> "$LOG_FILE" 2>&1 || true
-        rm -f /usr/local/bin/docker-compose /usr/local/bin/docker-machine /usr/bin/docker-compose
         apt-get autoremove -y >> "$LOG_FILE" 2>&1
         rm -rf /var/lib/docker
         rm -rf /etc/docker
         rm -f /etc/apt/sources.list.d/docker.list
         rm -f /usr/share/keyrings/docker-archive-keyring.gpg
+        rm -f /usr/local/bin/docker-compose /usr/local/bin/docker-machine /usr/bin/docker-compose
         echo -e "${GREEN}Docker purged successfully.${NC}"
         log "Docker purged successfully."
     else
