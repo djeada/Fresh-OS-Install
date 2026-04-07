@@ -14,7 +14,7 @@ LOG_FILE="/var/log/browser_manager.log"
 
 # Function to log messages
 log() {
-    echo -e "$(date +"%Y-%m-%d %T") : $1" | sudo tee -a "$LOG_FILE" > /dev/null
+    echo -e "$(date +"%Y-%m-%d %T") : $1" | tee -a "$LOG_FILE" > /dev/null
 }
 
 # Function to check if script is run as root
@@ -142,8 +142,9 @@ install_vivaldi() {
     apt install -y software-properties-common wget >> "$LOG_FILE" 2>&1
 
     echo -e "${GREEN}Adding Vivaldi repository...${NC}"
-    wget -qO- https://repo.vivaldi.com/archive/linux_signing_key.pub | apt-key add - >> "$LOG_FILE" 2>&1
-    add-apt-repository "deb [arch=amd64] https://repo.vivaldi.com/archive/deb/ stable main" >> "$LOG_FILE" 2>&1
+    wget -qO- https://repo.vivaldi.com/archive/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/vivaldi-archive-keyring.gpg >> "$LOG_FILE" 2>&1
+    echo "deb [signed-by=/usr/share/keyrings/vivaldi-archive-keyring.gpg arch=amd64] https://repo.vivaldi.com/archive/deb/ stable main" | \
+        tee /etc/apt/sources.list.d/vivaldi.list > /dev/null
 
     echo -e "${GREEN}Updating package lists...${NC}"
     apt update >> "$LOG_FILE" 2>&1
@@ -166,10 +167,11 @@ install_opera() {
     apt install -y gnupg2 software-properties-common wget >> "$LOG_FILE" 2>&1
 
     echo -e "${GREEN}Adding Opera's GPG key...${NC}"
-    wget -qO- https://deb.opera.com/archive.key | apt-key add - >> "$LOG_FILE" 2>&1
+    wget -qO- https://deb.opera.com/archive.key | gpg --dearmor -o /usr/share/keyrings/opera-archive-keyring.gpg >> "$LOG_FILE" 2>&1
 
     echo -e "${GREEN}Adding Opera repository...${NC}"
-    add-apt-repository "deb https://deb.opera.com/opera-stable/ stable non-free" >> "$LOG_FILE" 2>&1
+    echo "deb [signed-by=/usr/share/keyrings/opera-archive-keyring.gpg] https://deb.opera.com/opera-stable/ stable non-free" | \
+        tee /etc/apt/sources.list.d/opera.list > /dev/null
 
     echo -e "${GREEN}Updating package lists...${NC}"
     apt update >> "$LOG_FILE" 2>&1
@@ -281,7 +283,10 @@ update_browsers() {
     apt update >> "$LOG_FILE" 2>&1
 
     echo -e "${GREEN}Upgrading installed browsers...${NC}"
-    apt install -y firefox brave-browser vivaldi-stable opera-stable >> "$LOG_FILE" 2>&1
+    if command -v firefox &> /dev/null; then apt install -y firefox >> "$LOG_FILE" 2>&1 || true; fi
+    if command -v brave-browser &> /dev/null; then apt install -y brave-browser >> "$LOG_FILE" 2>&1 || true; fi
+    if command -v vivaldi &> /dev/null; then apt install -y vivaldi-stable >> "$LOG_FILE" 2>&1 || true; fi
+    if command -v opera &> /dev/null; then apt install -y opera-stable >> "$LOG_FILE" 2>&1 || true; fi
 
     echo -e "${GREEN}Browsers updated successfully.${NC}"
     log "Browsers updated successfully."
@@ -289,25 +294,18 @@ update_browsers() {
     main_menu
 }
 
-# Function to install additional tools (placeholder for future tools)
-install_additional_tools() {
-    echo -e "${YELLOW}No additional tools available at the moment.${NC}"
-    pause
-    install_menu
-}
-
 # Function to pause the script until user presses Enter
 pause() {
     echo
-    read -rp "Press Enter to continue..." key
+    read -rp "Press Enter to continue..."
 }
 
 # Ensure the script is run as root
 check_root
 
 # Ensure log file exists
-sudo touch "$LOG_FILE"
-sudo chmod 666 "$LOG_FILE"
+touch "$LOG_FILE"
+chmod 644 "$LOG_FILE"
 
 # Start the script by displaying the main menu
 main_menu
