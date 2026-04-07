@@ -79,13 +79,13 @@ SPECIFIC_PURGES=(
 # Function to purge font packages
 purge_fonts() {
     log "Purging specified font packages..."
-    sudo apt purge -y "${FONTS_TO_PURGE[@]}" || log "Some font packages could not be purged."
+    apt purge -y "${FONTS_TO_PURGE[@]}" || log "Some font packages could not be purged."
 }
 
 # Function to remove specific packages
 remove_specific_packages() {
     log "Removing specific packages..."
-    sudo apt purge -y "${SPECIFIC_PURGES[@]}" || log "Some specific packages could not be purged."
+    apt purge -y "${SPECIFIC_PURGES[@]}" || log "Some specific packages could not be purged."
 }
 
 # Function to remove bloatware
@@ -94,7 +94,7 @@ remove_bloatware() {
     for package in "${BLOATWARE[@]}"; do
         if dpkg -l | grep -qw "$package"; then
             log "Removing $package..."
-            sudo apt remove --purge -y "$package" || log "Failed to remove $package."
+            apt remove --purge -y "$package" || log "Failed to remove $package."
         else
             log "$package is not installed. Skipping..."
         fi
@@ -104,20 +104,20 @@ remove_bloatware() {
 # Function to clean up the system
 cleanup_system() {
     log "Running autoremove and clean..."
-    sudo apt autoremove -y || log "Autoremove encountered issues."
-    sudo apt clean || log "Failed to clean the package cache."
+    apt autoremove -y || log "Autoremove encountered issues."
+    apt clean || log "Failed to clean the package cache."
 }
 
 # Function to update package lists
 update_package_lists() {
     log "Updating package lists..."
-    sudo apt update || { log "Failed to update package lists."; exit 1; }
+    apt update || { log "Failed to update package lists."; exit 1; }
 }
 
 # Function to upgrade installed packages
 upgrade_packages() {
     log "Upgrading installed packages..."
-    sudo apt upgrade -y || log "Failed to upgrade some packages."
+    apt upgrade -y || log "Failed to upgrade some packages."
 }
 
 # Function to display summary

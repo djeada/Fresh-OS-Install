@@ -14,7 +14,7 @@ LOG_FILE="/var/log/docker_manager.log"
 
 # Function to log messages
 log() {
-    echo -e "$(date +"%Y-%m-%d %T") : $1" | sudo tee -a "$LOG_FILE" > /dev/null
+    echo -e "$(date +"%Y-%m-%d %T") : $1" | tee -a "$LOG_FILE" > /dev/null
 }
 
 # Function to check if script is run as root
@@ -264,15 +264,13 @@ purge_docker() {
     if [[ "$confirm" =~ ^[Yy]$ ]]; then
         echo -e "${YELLOW}Purging Docker and related packages...${NC}"
         log "Purging Docker and related packages."
-        apt-get purge -y docker-ce docker-ce-cli containerd.io docker-compose docker-machine portainer.io >> "$LOG_FILE" 2>&1 || true
+        apt-get purge -y docker-ce docker-ce-cli containerd.io >> "$LOG_FILE" 2>&1 || true
         apt-get autoremove -y >> "$LOG_FILE" 2>&1
         rm -rf /var/lib/docker
         rm -rf /etc/docker
         rm -f /etc/apt/sources.list.d/docker.list
         rm -f /usr/share/keyrings/docker-archive-keyring.gpg
-        rm -f /usr/local/bin/docker-compose
-        rm -f /usr/local/bin/docker-machine
-        rm -f /usr/bin/docker-compose
+        rm -f /usr/local/bin/docker-compose /usr/local/bin/docker-machine /usr/bin/docker-compose
         echo -e "${GREEN}Docker purged successfully.${NC}"
         log "Docker purged successfully."
     else
@@ -316,15 +314,15 @@ update_docker() {
 # Function to pause the script until user presses Enter
 pause() {
     echo
-    read -rp "Press Enter to continue..." key
+    read -rp "Press Enter to continue..."
 }
 
 # Ensure the script is run as root
 check_root
 
 # Ensure log file exists
-sudo touch "$LOG_FILE"
-sudo chmod 666 "$LOG_FILE"
+touch "$LOG_FILE"
+chmod 644 "$LOG_FILE"
 
 # Start the script by displaying the main menu
 main_menu
